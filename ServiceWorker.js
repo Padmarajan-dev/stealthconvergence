@@ -1,9 +1,9 @@
 const cacheName = "DefaultCompany-Stealth_conevrgence-0.1.0";
 const contentToCache = [
-    "Build/Build.loader.js",
-    "Build/Build.framework.js.unityweb",
-    "Build/Build.data.unityweb",
-    "Build/Build.wasm.unityweb",
+    "Build/Stealth_convergence.loader.js",
+    "Build/Stealth_convergence.framework.js.unityweb",
+    "Build/Stealth_convergence.data.unityweb",
+    "Build/Stealth_convergence.wasm.unityweb",
     "TemplateData/style.css"
 
 ];
