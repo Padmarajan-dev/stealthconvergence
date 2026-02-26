@@ -7,8 +7,97 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <link rel="manifest" href="manifest.webmanifest">
+    <style>
+      /* ── Rotate Overlay ── */
+      #rotate-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #0d0d0f;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        font-family: 'Segoe UI', sans-serif;
+      }
+
+      #rotate-overlay .phone-icon {
+        width: 70px;
+        height: 70px;
+        animation: rotatePhone 1.8s ease-in-out infinite;
+      }
+
+      #rotate-overlay .rotate-title {
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        margin: 0;
+        text-align: center;
+      }
+
+      #rotate-overlay .rotate-sub {
+        color: #888;
+        font-size: 14px;
+        margin: -16px 0 0;
+        text-align: center;
+        letter-spacing: 0.02em;
+      }
+
+      /* Glowing ring behind phone */
+      #rotate-overlay .ring {
+        position: absolute;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 160, 30, 0.25);
+        animation: pulse 2s ease-in-out infinite;
+      }
+      #rotate-overlay .ring2 {
+        width: 180px;
+        height: 180px;
+        border-color: rgba(255, 160, 30, 0.1);
+        animation-delay: 0.4s;
+      }
+
+      @keyframes rotatePhone {
+        0%   { transform: rotate(0deg);   }
+        40%  { transform: rotate(90deg);  }
+        60%  { transform: rotate(90deg);  }
+        100% { transform: rotate(0deg);   }
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1);   opacity: 1; }
+        50%       { transform: scale(1.12); opacity: 0.4; }
+      }
+
+      /* Show overlay only on portrait mobile */
+      @media only screen and (max-width: 900px) and (orientation: portrait) {
+        #rotate-overlay { display: flex; }
+      }
+    </style>
   </head>
   <body>
+
+    <!-- ── Rotate to Landscape Overlay ── -->
+    <div id="rotate-overlay">
+      <div class="ring"></div>
+      <div class="ring ring2"></div>
+
+      <!-- Phone SVG that rotates -->
+      <svg class="phone-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="16" y="4" width="32" height="56" rx="6" stroke="#FF9F1C" stroke-width="3.5"/>
+        <circle cx="32" cy="52" r="2.5" fill="#FF9F1C"/>
+        <rect x="26" y="8" width="12" height="2" rx="1" fill="#FF9F1C" opacity="0.5"/>
+      </svg>
+
+      <p class="rotate-title">Rotate Your Device</p>
+      <p class="rotate-sub">Please switch to landscape mode to play</p>
+    </div>
+
+    <!-- ── Unity Container ── -->
     <div id="unity-container">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
@@ -19,6 +108,7 @@
       </div>
       <div id="unity-warning"> </div>
     </div>
+
     <script>
       window.addEventListener("load", function () {
         if ("serviceWorker" in navigator) {
@@ -32,12 +122,6 @@
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
       var warningBanner = document.querySelector("#unity-warning");
 
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
       function unityShowBanner(msg, type) {
         function updateBannerVisibility() {
           warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
@@ -56,6 +140,14 @@
         updateBannerVisibility();
       }
 
+      // ── Mobile viewport meta ──
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      }
+
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/Build.loader.js";
       var config = {
@@ -69,21 +161,6 @@
         productVersion: "0.1.0",
         showBanner: unityShowBanner,
       };
-
-      // By default Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-      }
 
       loadingBar.style.display = "block";
 
