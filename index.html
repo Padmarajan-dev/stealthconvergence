@@ -60,11 +60,12 @@
         animation-delay: 0.4s;
       }
 
+      /* Phone starts horizontal (landscape), rotates to vertical (portrait) */
       @keyframes rotatePhone {
-        0%   { transform: rotate(0deg);  }
-        40%  { transform: rotate(90deg); }
-        60%  { transform: rotate(90deg); }
-        100% { transform: rotate(0deg);  }
+        0%   { transform: rotate(90deg); }
+        40%  { transform: rotate(0deg);  }
+        60%  { transform: rotate(0deg);  }
+        100% { transform: rotate(90deg); }
       }
 
       @keyframes pulse {
@@ -85,7 +86,7 @@
         <rect x="26" y="8" width="12" height="2" rx="1" fill="#FF9F1C" opacity="0.5"/>
       </svg>
       <p class="rotate-title">Rotate Your Device</p>
-      <p class="rotate-sub">Please switch to landscape mode to play</p>
+      <p class="rotate-sub">Please switch to portrait mode to play</p>
     </div>
 
     <div id="unity-container">
@@ -105,8 +106,9 @@
 
       function checkOrientation() {
         if (!isMobile) return;
-        var isPortrait = window.innerHeight > window.innerWidth;
-        overlay.style.display = isPortrait ? 'flex' : 'none';
+        // Show overlay when in LANDSCAPE, hide when in PORTRAIT
+        var isLandscape = window.innerWidth > window.innerHeight;
+        overlay.style.display = isLandscape ? 'flex' : 'none';
       }
 
       checkOrientation();
