@@ -8,12 +8,11 @@
     <link rel="stylesheet" href="TemplateData/style.css">
     <link rel="manifest" href="manifest.webmanifest">
     <style>
-      /* ── Rotate Overlay ── */
       #rotate-overlay {
         display: none;
         position: fixed;
         inset: 0;
-        z-index: 9999;
+        z-index: 99999;
         background: #0d0d0f;
         flex-direction: column;
         align-items: center;
@@ -45,7 +44,6 @@
         letter-spacing: 0.02em;
       }
 
-      /* Glowing ring behind phone */
       #rotate-overlay .ring {
         position: absolute;
         width: 130px;
@@ -54,6 +52,7 @@
         border: 2px solid rgba(255, 160, 30, 0.25);
         animation: pulse 2s ease-in-out infinite;
       }
+
       #rotate-overlay .ring2 {
         width: 180px;
         height: 180px;
@@ -62,42 +61,33 @@
       }
 
       @keyframes rotatePhone {
-        0%   { transform: rotate(0deg);   }
-        40%  { transform: rotate(90deg);  }
-        60%  { transform: rotate(90deg);  }
-        100% { transform: rotate(0deg);   }
+        0%   { transform: rotate(0deg);  }
+        40%  { transform: rotate(90deg); }
+        60%  { transform: rotate(90deg); }
+        100% { transform: rotate(0deg);  }
       }
 
       @keyframes pulse {
-        0%, 100% { transform: scale(1);   opacity: 1; }
+        0%, 100% { transform: scale(1);    opacity: 1;   }
         50%       { transform: scale(1.12); opacity: 0.4; }
-      }
-
-      /* Show overlay only on portrait mobile */
-      @media only screen and (max-width: 900px) and (orientation: portrait) {
-        #rotate-overlay { display: flex; }
       }
     </style>
   </head>
   <body>
 
-    <!-- ── Rotate to Landscape Overlay ── -->
+    <!-- Rotate Overlay -->
     <div id="rotate-overlay">
       <div class="ring"></div>
       <div class="ring ring2"></div>
-
-      <!-- Phone SVG that rotates -->
       <svg class="phone-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="16" y="4" width="32" height="56" rx="6" stroke="#FF9F1C" stroke-width="3.5"/>
         <circle cx="32" cy="52" r="2.5" fill="#FF9F1C"/>
         <rect x="26" y="8" width="12" height="2" rx="1" fill="#FF9F1C" opacity="0.5"/>
       </svg>
-
       <p class="rotate-title">Rotate Your Device</p>
       <p class="rotate-sub">Please switch to landscape mode to play</p>
     </div>
 
-    <!-- ── Unity Container ── -->
     <div id="unity-container">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
@@ -108,8 +98,26 @@
       </div>
       <div id="unity-warning"> </div>
     </div>
-
     <script>
+      // ── Orientation Detection ──────────────────────────────────────
+      var overlay = document.getElementById('rotate-overlay');
+      var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      function checkOrientation() {
+        if (!isMobile) return;
+        var isPortrait = window.innerHeight > window.innerWidth;
+        overlay.style.display = isPortrait ? 'flex' : 'none';
+      }
+
+      checkOrientation();
+      window.addEventListener('resize', checkOrientation);
+      window.addEventListener('orientationchange', function () {
+        setTimeout(checkOrientation, 200);
+        setTimeout(checkOrientation, 500);
+      });
+      setInterval(checkOrientation, 500);
+      // ──────────────────────────────────────────────────────────────
+
       window.addEventListener("load", function () {
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker.register("ServiceWorker.js");
@@ -140,27 +148,28 @@
         updateBannerVisibility();
       }
 
-      // ── Mobile viewport meta ──
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-      }
-
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Build.loader.js";
+      var loaderUrl = buildUrl + "/Stealth_convergence.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Build.data.unityweb",
-        frameworkUrl: buildUrl + "/Build.framework.js.unityweb",
-        codeUrl: buildUrl + "/Build.wasm.unityweb",
+        dataUrl: buildUrl + "/Stealth_convergence.data.unityweb",
+        frameworkUrl: buildUrl + "/Stealth_convergence.framework.js.unityweb",
+        codeUrl: buildUrl + "/Stealth_convergence.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Stealth_conevrgence",
         productVersion: "0.1.0",
         showBanner: unityShowBanner,
       };
+
+      // config.matchWebGLToCanvasSize = false;
+
+      if (isMobile) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      }
 
       loadingBar.style.display = "block";
 
